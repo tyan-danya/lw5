@@ -58,6 +58,7 @@ window.onload = function onload() {
             setPrice(productsList[productsListIndex], Number(event.target.value));
           }
           calculateTotalPrice(productsList[productsListIndex]);
+          console.log(1);
         }
       })
     });
