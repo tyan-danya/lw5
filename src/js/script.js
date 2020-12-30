@@ -10,11 +10,9 @@ import {
 
 function createObservableArray(array, callback) {
   for (let i = 0; i < array.length; i++) {
-    calculateTotalPrice(array[i]);
     array[i] = new Proxy(array[i], {
       set(target, property, value) {
         target[property] = value;
-        calculateTotalPrice(target);
         callback();
         return true;
       },
@@ -59,18 +57,21 @@ window.onload = function onload() {
           } else if (input.classList.contains('product-table-row-cell__input--price')) {
             setPrice(productsList[productsListIndex], Number(event.target.value));
           }
+          calculateTotalPrice(productsList[productsListIndex]);
         }
       })
     });
 
   }
 
-  const productsList = createObservableArray([
-      { id: 1, name: 'Молоко', count: 40, priceForOne: 50 },
-      { id: 2, name: 'Хлеб', count: 100, priceForOne: 20 },
-      { id: 3, name: 'Лук', count: 200, priceForOne: 5 }
-    ],
-    updateUI);
-
+  let productsList = [
+    { id: 1, name: 'Молоко', count: 40, priceForOne: 50 },
+    { id: 2, name: 'Хлеб', count: 100, priceForOne: 20 },
+    { id: 3, name: 'Лук', count: 200, priceForOne: 5 }
+  ];
+  for (let i = 0; i < productsList.length; i++) {
+    calculateTotalPrice(productsList[i]);
+  }
+  productsList = createObservableArray(productsList, updateUI);
   updateUI();
 }
