@@ -4,43 +4,26 @@ eslint no-param-reassign: "error"
 import {
   calculateTotalPrice,
   getAllTotalPrice,
-  setCount,
-  setPrice
-} from './functions.js';
+  setProductCount,
+  setProductPrice,
+} from './products-methods.js';
 
-function createObservableArray(array, callback) {
-  for (let i = 0; i < array.length; i++) {
-    array[i] = new Proxy(array[i], {
-      set(target, property, value) {
-        target[property] = value;
-        callback();
-        return true;
-      },
-    });
-  }
-  return new Proxy(array, {
-    set(target, property, value) {
-      target[property] = value;
-      callback();
-      return true;
-    }
-  });
-}
+import { createObservableArray } from '../utils/observable-structures';
 
 function addEventDblClick(element) {
   element.addEventListener('dblclick', (event) => {
     event.target.readOnly = false;
-  })
+  });
 }
 
 window.onload = function onload() {
   function updateUI() {
-    const tableTemplateSource = document.querySelector(".table-template").innerHTML;
+    const tableTemplateSource = document.querySelector('.table-template').innerHTML;
     const tableTemplate = Handlebars.compile(tableTemplateSource);
     const result = getAllTotalPrice(productsList);
     const tableHTML = tableTemplate({ productsList, result });
-    document.querySelector(".product-table").innerHTML = tableHTML;
-    const inputs = document.querySelectorAll(".product-table-row-cell__input");
+    document.querySelector('.product-table').innerHTML = tableHTML;
+    const inputs = document.querySelectorAll('.product-table-row-cell__input');
     inputs.forEach(addEventDblClick);
     inputs.forEach((input) => {
       input.addEventListener('keydown', (event) => {
@@ -52,27 +35,30 @@ window.onload = function onload() {
               productsListIndex = i;
             }
           });
+          let error = false;
           if (input.classList.contains('product-table-row-cell__input--count')) {
-            setCount(productsList[productsListIndex], Number(event.target.value));
+            error = !setProductCount(productsList[productsListIndex], Number(event.target.value));
           } else if (input.classList.contains('product-table-row-cell__input--price')) {
-            setPrice(productsList[productsListIndex], Number(event.target.value));
+            error = !setProductPrice(productsList[productsListIndex], Number(event.target.value));
           }
-          calculateTotalPrice(productsList[productsListIndex]);
-          console.log(1);
+          if (error) {
+            alert('Invalid input');
+          } else {
+            calculateTotalPrice(productsList[productsListIndex]);
+          }
         }
-      })
+      });
     });
-
   }
 
   let productsList = [
     { id: 1, name: 'Молоко', count: 40, priceForOne: 50 },
     { id: 2, name: 'Хлеб', count: 100, priceForOne: 20 },
-    { id: 3, name: 'Лук', count: 200, priceForOne: 5 }
+    { id: 3, name: 'Лук', count: 200, priceForOne: 5 },
   ];
   for (let i = 0; i < productsList.length; i++) {
     calculateTotalPrice(productsList[i]);
   }
   productsList = createObservableArray(productsList, updateUI);
   updateUI();
-}
+};
